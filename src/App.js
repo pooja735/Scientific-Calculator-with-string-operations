@@ -570,6 +570,7 @@
 // }
 import React, { useState, useRef } from "react";
 import { motion } from "framer-motion";
+import "./styles.css";
 
 // Combined layout: numbers, operators, and letters in a compact grid
 const mainButtons = [
@@ -716,79 +717,23 @@ export default function CompactCalculator() {
   };
 
   return (
-    <div style={{
-      minHeight: '100vh',
-      background: theme === 'dark' 
-        ? 'linear-gradient(135deg, #1a1a2e, #16213e)' 
-        : 'linear-gradient(135deg, #f5f7fa, #c3cfe2)',
-      color: theme === 'dark' ? '#fff' : '#333',
-      fontFamily: 'Arial, sans-serif',
-      padding: '20px'
-    }}>
-      <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'flex', gap: '20px' }}>
-        
-        {/* Calculator Main */}
-        <motion.div 
-          style={{
-            background: theme === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.9)',
-            borderRadius: '20px',
-            padding: '20px',
-            boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
-            backdropFilter: 'blur(10px)',
-            border: '1px solid rgba(255,255,255,0.2)',
-            flex: '1'
-          }}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-        >
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-            <h2 style={{ margin: 0, fontSize: '1.5rem' }}>Advanced Calculator</h2>
-            <div style={{ display: 'flex', gap: '10px' }}>
-              <button 
-                onClick={() => setShowInstructions(!showInstructions)}
-                style={{
-                  background: 'rgba(74, 144, 226, 0.8)',
-                  border: 'none',
-                  borderRadius: '10px',
-                  color: 'white',
-                  padding: '8px 12px',
-                  cursor: 'pointer',
-                  fontSize: '14px'
-                }}
-              >
+    <div className={`shell ${theme}`}>
+      <div className="shell-inner">
+        <motion.div className="panel calc" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+          <div className="calc__header">
+            <h2 className="calc__title">Advanced Calculator</h2>
+            <div className="header__actions">
+              <button className="btn btn-help" onClick={() => setShowInstructions(!showInstructions)}>
                 {showInstructions ? 'Hide' : 'Help'}
               </button>
-              <button 
-                onClick={toggleTheme}
-                style={{
-                  background: 'rgba(255,255,255,0.2)',
-                  border: 'none',
-                  borderRadius: '10px',
-                  color: theme === 'dark' ? '#fff' : '#333',
-                  padding: '8px 12px',
-                  cursor: 'pointer',
-                  fontSize: '16px'
-                }}
-              >
+              <button className="btn btn-theme" onClick={toggleTheme}>
                 {theme === "light" ? "🌙" : "☀️"}
               </button>
             </div>
           </div>
 
           <motion.input
-            style={{
-              width: '100%',
-              height: '60px',
-              fontSize: '24px',
-              textAlign: 'right',
-              border: 'none',
-              borderRadius: '15px',
-              background: theme === 'dark' ? 'rgba(0,0,0,0.3)' : 'rgba(0,0,0,0.1)',
-              color: theme === 'dark' ? '#fff' : '#333',
-              padding: '0 20px',
-              marginBottom: '15px',
-              outline: 'none'
-            }}
+            className="display"
             ref={inputRef}
             value={expression}
             readOnly
@@ -796,111 +741,44 @@ export default function CompactCalculator() {
             animate={{ opacity: 1 }}
           />
 
-          <div style={{
-            textAlign: 'center',
-            marginBottom: '15px',
-            padding: '8px',
-            background: 'rgba(74, 144, 226, 0.2)',
-            borderRadius: '10px',
-            fontSize: '14px'
-          }}>
-            Unit Mode: {unitConversions[unitIndex].label}
-          </div>
+          <div className="unit-badge">Unit Mode: {unitConversions[unitIndex].label}</div>
 
-          {/* Main Button Grid */}
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(8, 1fr)',
-            gap: '8px',
-            marginBottom: '20px'
-          }}>
-            {mainButtons.slice(0, -1).map((btn, index) => (
-              <motion.button
-                key={`${btn}-${index}`}
-                onClick={() => handleClick(btn)}
-                style={{
-                  height: '50px',
-                  border: theme === 'dark' 
-                    ? '2px solid #2d2d2dff' 
-                    : '2px solid rgba(0,0,0,0.2)',
-                  borderRadius: '12px',
-                  background: btn === '=' 
-                    ? '#2563eb'
-                    : theme === 'dark' 
-                    ? '#6b7280' 
-                    : '#ffffff',
-                  color: btn === '=' 
-                    ? 'white' 
-                    : theme === 'dark' 
-                    ? '#ffffff' 
-                    : '#000000',
-                  fontSize: /^[A-Z]$/.test(btn) ? '16px' : '14px',
-                  fontWeight: 'bold',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s ease',
-                  boxShadow: theme === 'dark' 
-                    ? '0 4px 8px rgba(0,0,0,0.15)' 
-                    : '0 4px 8px rgba(0,0,0,0.15)'
-                }}
-                whileHover={{ scale: 1.05, boxShadow: '0 6px 12px rgba(0,0,0,0.3)' }}
-                whileTap={{ scale: 0.95 }}
-              >
-                {btn}
-              </motion.button>
-            ))}
-            {/* Convert button spanning 2 columns */}
+          <div className="grid grid-8">
+            {mainButtons.slice(0, -1).map((btn, index) => {
+              const variant =
+                btn === '=' ? 'btn-equals' :
+                /^\d$/.test(btn) ? 'btn-number' :
+                /^[A-Z]$/.test(btn) ? 'btn-letter' :
+                (btn === ',' || btn === ':') ? 'btn-punct' : 'btn-operator';
+              return (
+                <motion.button
+                  key={`${btn}-${index}`}
+                  onClick={() => handleClick(btn)}
+                  className={`btn ${variant}`}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  {btn}
+                </motion.button>
+              );
+            })}
             <motion.button
               onClick={() => handleClick("convert")}
-              style={{
-                height: '50px',
-                border: theme === 'dark' 
-                  ? '2px solid #2d2d2dff' 
-                  : '2px solid rgba(0,0,0,0.2)',
-                borderRadius: '12px',
-                background: theme === 'dark' ? '#6b7280' : '#ffffff',
-                color: theme === 'dark' ? '#ffffff' : '#000000',
-                fontSize: '14px',
-                fontWeight: 'bold',
-                cursor: 'pointer',
-                transition: 'all 0.2s ease',
-                boxShadow: theme === 'dark' 
-                  ? '0 4px 8px rgba(0,0,0,0.15)' 
-                  : '0 4px 8px rgba(0,0,0,0.15)',
-                gridColumn: 'span 1'
-              }}
-              whileHover={{ scale: 1.05, boxShadow: '0 6px 12px rgba(0,0,0,0.3)' }}
+              className="btn btn-convert"
+              whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
               convert
             </motion.button>
           </div>
 
-          {/* String Operations */}
-          <h4 style={{ marginBottom: '10px' }}>String Operations</h4>
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(6, 1fr)',
-            gap: '8px'
-          }}>
+          <h4 className="section-title">String Operations</h4>
+          <div className="grid grid-6">
             {stringButtons.map((btn) => (
               <motion.button
                 key={btn}
                 onClick={() => handleClick(btn)}
-                style={{
-                  height: '40px',
-                  border: theme === 'dark' 
-                    ? '2px solid #2d2d2dff' 
-                    : '2px solid rgba(0,0,0,0.2)',
-                  borderRadius: '10px',
-                  background: theme === 'dark' ? '#6b7280' : '#ffffff',
-                  color: theme === 'dark' ? '#ffffff' : '#000000',
-                  fontSize: '12px',
-                  fontWeight: 'bold',
-                  cursor: 'pointer',
-                  boxShadow: theme === 'dark' 
-                    ? '0 2px 4px rgba(0,0,0,0.5)' 
-                    : '0 2px 4px rgba(0,0,0,0.15)'
-                }}
+                className="btn btn-accent"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
@@ -910,50 +788,29 @@ export default function CompactCalculator() {
           </div>
         </motion.div>
 
-        {/* Instructions Panel */}
         {showInstructions && (
-          <motion.div 
-            style={{
-              width: '350px',
-              background: theme === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.9)',
-              borderRadius: '20px',
-              padding: '20px',
-              boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
-              backdropFilter: 'blur(10px)',
-              border: '1px solid rgba(255,255,255,0.2)',
-              fontSize: '14px',
-              lineHeight: '1.6',
-              maxHeight: '600px',
-              overflowY: 'auto'
-            }}
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-          >
-            <h3 style={{ marginTop: 0, color: '#4a90e2' }}>How to Use</h3>
-            
-            <div style={{ marginBottom: '15px' }}>
+          <motion.div className="panel help" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}>
+            <h3 className="panel__title">How to Use</h3>
+            <div className="help__group">
               <strong>📊 Basic Math:</strong>
               <br />• Numbers: 0-9, decimal point (.)
               <br />• Operators: +, -, *, /
               <br />• Example: 15 + 25 * 2 = 65
             </div>
-
-            <div style={{ marginBottom: '15px' }}>
+            <div className="help__group">
               <strong>🔬 Scientific:</strong>
               <br />• √: Square root (√16 = 4)
               <br />• sin, cos, tan: Trig functions
               <br />• log: Base-10 logarithm
               <br />• sci: Toggle scientific notation
             </div>
-
-            <div style={{ marginBottom: '15px' }}>
+            <div className="help__group">
               <strong>📐 Unit Conversion:</strong>
               <br />• Click "unit" to cycle conversions
               <br />• Enter number, click "convert"
               <br />• Examples: 5 → convert (m to cm = 500)
             </div>
-
-            <div style={{ marginBottom: '15px' }}>
+            <div className="help__group">
               <strong>📝 String Operations:</strong>
               <br />• <strong>concat:</strong> hello,world → helloworld
               <br />• <strong>len:</strong> hello → 5
@@ -962,8 +819,7 @@ export default function CompactCalculator() {
               <br />• <strong>reverse:</strong> hello → olleh
               <br />• <strong>substr:</strong> hello:1:3 → el
             </div>
-
-            <div style={{ marginBottom: '15px' }}>
+            <div className="help__group">
               <strong>🎯 Special Features:</strong>
               <br />• A-Z: Type letters (auto lowercase)
               <br />• copy: Copy result to clipboard
@@ -971,13 +827,7 @@ export default function CompactCalculator() {
               <br />• C: Clear display
               <br />• ⌫: Backspace
             </div>
-
-            <div style={{
-              background: 'rgba(74, 144, 226, 0.1)',
-              padding: '10px',
-              borderRadius: '8px',
-              fontSize: '12px'
-            }}>
+            <div className="help__tips">
               <strong>💡 Pro Tips:</strong>
               <br />• Use parentheses for complex expressions
               <br />• Mix numbers and letters for variables
@@ -987,36 +837,16 @@ export default function CompactCalculator() {
           </motion.div>
         )}
 
-        {/* History Panel */}
-        <motion.div 
-          style={{
-            width: '300px',
-            background: theme === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.9)',
-            borderRadius: '20px',
-            padding: '20px',
-            boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
-            backdropFilter: 'blur(10px)',
-            border: '1px solid rgba(255,255,255,0.2)'
-          }}
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-        >
-          <h3 style={{ marginTop: 0, color: '#4a90e2' }}>History</h3>
-          <div style={{ maxHeight: '500px', overflowY: 'auto' }}>
+        <motion.div className="panel side" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}>
+          <h3 className="panel__title">History</h3>
+          <div className="history__list">
             {history.length === 0 ? (
-              <p style={{ opacity: 0.6, fontStyle: 'italic' }}>No calculations yet...</p>
+              <p className="history__empty">No calculations yet...</p>
             ) : (
               history.map((item, index) => (
                 <motion.div
                   key={index}
-                  style={{
-                    padding: '8px 12px',
-                    margin: '5px 0',
-                    background: 'rgba(74, 144, 226, 0.1)',
-                    borderRadius: '8px',
-                    fontSize: '12px',
-                    wordBreak: 'break-word'
-                  }}
+                  className="history__item"
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.1 }}
